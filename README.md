@@ -4,7 +4,7 @@
 
 **[Live Demo - 在这里插入你的部署链接]**
 
-![应用截图预览](https://user-images.githubusercontent.com/.../your-screenshot.png)  <!-- 建议你截个图传上来 -->
+![应用截图预览](效果图/a1.png)  <!-- 建议你截个图传上来 -->
 
 ---
 
@@ -32,12 +32,12 @@
 
 1.  **克隆仓库**
     ```bash
-    git clone [你的仓库SSH或HTTPS链接]
+    git clone https://github.com/buxuele/excalidraw-next-js-app
     ```
 
 2.  **进入项目目录**
     ```bash
-    cd [你的项目文件夹名]
+    cd excalidraw-next-js-app
     ```
 
 3.  **安装依赖**
