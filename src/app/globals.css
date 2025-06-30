@@ -1,42 +1,148 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html,
+/* --- 全局与基础样式 --- */
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f8f9fa; /* 给一个柔和的背景色 */
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
+/* --- HomePage 容器样式 --- */
+.home-page-container {
+  width: 95%;
+  max-width: 1400px; /* 给一个最大宽度，防止在大屏幕上过于分散 */
+  margin: 0 auto; /* 水平居中 */
+  padding: 2rem;
   box-sizing: border-box;
+}
+
+.home-page-container h1 {
+  font-size: 2.5rem;
+  color: #212529;
+  margin-bottom: 2rem;
+}
+
+/* --- 网格布局 --- */
+.projects-grid {
+  display: grid;
+  /* 关键：创建响应式 4 列布局 */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem; /* 网格间距 */
+}
+
+/* --- 卡片通用样式 --- */
+.project-card {
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+  overflow: hidden; /* 确保内容不会溢出圆角 */
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* --- “新建”卡片的特殊样式 --- */
+.new-project-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px; /* 和普通卡片保持一致的高度 */
+  border-style: dashed;
+  color: #868e96;
+}
+
+.new-project-card:hover {
+  background-color: #f1f3f5;
+  color: #495057;
+}
+
+.new-project-card .plus-icon {
+  font-size: 4rem;
+  font-weight: 200;
+}
+
+/* --- 作品卡片的缩略图占位符 --- */
+/* --- 新的 SVG 缩略图容器样式 --- */
+.card-thumbnail {
+  height: 180px;
+  overflow: hidden; /* 隐藏 SVG 溢出的部分 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff; /* 给一个白色背景，以防绘图是透明的 */
+}
+
+.card-thumbnail svg {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+
+
+/* --- 卡片底部信息区域 --- */
+.card-info {
+  padding: 1rem;
+  border-top: 1px solid #e9ecef;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-info .page-name {
+  font-weight: 600;
+  color: #343a40;
+}
+
+/* --- 重命名输入框样式 (用于卡片内) --- */
+.rename-input-card {
+  width: 100%;
   padding: 0;
   margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-bottom: 2px solid #007aff;
+  outline: none;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+/* --- 右键菜单样式 (保持不变) --- */
+.context-menu {
+  position: absolute;
+  z-index: 1000;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 8px 0;
+  min-width: 150px;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+.context-menu-item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.context-menu-item:hover {
+  background-color: #f0f0f0;
+}
+
+.context-menu-item.delete {
+  color: #d93025;
+}
+
+/* --- 绘图页面的样式 (保持不变) --- */
+.excalidraw-wrapper {
+  width: 100%;
+  height: 100%;
 }

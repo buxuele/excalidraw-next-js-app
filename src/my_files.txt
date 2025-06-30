@@ -1,0 +1,539 @@
+
+文件: D:\next_js\excalidraw-next-js-app\src\db.js
+内容:
+// 文件: src/db.js
+
+import { openDB } from 'idb';
+
+const DB_NAME = 'my-excalidraw-app-db';
+const DB_VERSION = 1;
+const STORE_NAME = 'pages';
+
+// 1. 我们不再立即创建 promise，而是把它设为 null
+let dbPromise = null;
+
+// 2. 创建一个“获取器”函数
+const getDb = () => {
+  // 3. 关键检查：只有在浏览器环境 (window 存在) 才继续
+  if (typeof window !== 'undefined') {
+    // 4. 如果 promise 还未创建，就创建它（懒加载）
+    if (!dbPromise) {
+      dbPromise = openDB(DB_NAME, DB_VERSION, {
+        upgrade(db) {
+          if (!db.objectStoreNames.contains(STORE_NAME)) {
+            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+          }
+        },
+      });
+    }
+    return dbPromise;
+  }
+  // 5. 如果在服务器环境，返回 null
+  return null;
+};
+
+// 6. 修改导出的对象，让每个方法都先调用 getDb
+export const db = {
+  async getAllPages() {
+    const db = await getDb();
+    // 如果在服务端，db 为 null，直接返回空数组，避免错误
+    if (!db) return []; 
+    return db.getAll(STORE_NAME);
+  },
+  async getPageById(id) {
+    const db = await getDb();
+    if (!db) return null; // 在服务端返回 null
+    return db.get(STORE_NAME, id);
+  },
+  async upsertPage(page) {
+    const db = await getDb();
+    if (!db) return Promise.resolve(); // 在服务端什么也不做
+    return db.put(STORE_NAME, page);
+  },
+  async deletePage(id) {
+    const db = await getDb();
+    if (!db) return Promise.resolve(); // 在服务端什么也不做
+    return db.delete(STORE_NAME, id);
+  },
+};
+
+目录: D:\next_js\excalidraw-next-js-app\src\app
+内容: [这是一个目录]
+
+目录: D:\next_js\excalidraw-next-js-app\src\components
+内容: [这是一个目录]
+
+目录: D:\next_js\excalidraw-next-js-app\src\utils
+内容: [这是一个目录]
+
+文件: D:\next_js\excalidraw-next-js-app\src\app\favicon.ico
+内容: [无法作为文本读取，可能是二进制文件]
+
+文件: D:\next_js\excalidraw-next-js-app\src\app\globals.css
+内容:
+/* --- 全局与基础样式 --- */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f8f9fa; /* 给一个柔和的背景色 */
+}
+
+/* --- HomePage 容器样式 --- */
+.home-page-container {
+  width: 95%;
+  max-width: 1400px; /* 给一个最大宽度，防止在大屏幕上过于分散 */
+  margin: 0 auto; /* 水平居中 */
+  padding: 2rem;
+  box-sizing: border-box;
+}
+
+.home-page-container h1 {
+  font-size: 2.5rem;
+  color: #212529;
+  margin-bottom: 2rem;
+}
+
+/* --- 网格布局 --- */
+.projects-grid {
+  display: grid;
+  /* 关键：创建响应式 4 列布局 */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem; /* 网格间距 */
+}
+
+/* --- 卡片通用样式 --- */
+.project-card {
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+  overflow: hidden; /* 确保内容不会溢出圆角 */
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* --- “新建”卡片的特殊样式 --- */
+.new-project-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 250px; /* 和普通卡片保持一致的高度 */
+  border-style: dashed;
+  color: #868e96;
+}
+
+.new-project-card:hover {
+  background-color: #f1f3f5;
+  color: #495057;
+}
+
+.new-project-card .plus-icon {
+  font-size: 4rem;
+  font-weight: 200;
+}
+
+/* --- 作品卡片的缩略图占位符 --- */
+/* --- 新的 SVG 缩略图容器样式 --- */
+.card-thumbnail {
+  height: 180px;
+  overflow: hidden; /* 隐藏 SVG 溢出的部分 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ffffff; /* 给一个白色背景，以防绘图是透明的 */
+}
+
+.card-thumbnail svg {
+  max-width: 100%;
+  max-height: 100%;
+}
+
+
+
+/* --- 卡片底部信息区域 --- */
+.card-info {
+  padding: 1rem;
+  border-top: 1px solid #e9ecef;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-info .page-name {
+  font-weight: 600;
+  color: #343a40;
+}
+
+/* --- 重命名输入框样式 (用于卡片内) --- */
+.rename-input-card {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-bottom: 2px solid #007aff;
+  outline: none;
+}
+
+/* --- 右键菜单样式 (保持不变) --- */
+.context-menu {
+  position: absolute;
+  z-index: 1000;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 8px 0;
+  min-width: 150px;
+}
+
+.context-menu-item {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.context-menu-item:hover {
+  background-color: #f0f0f0;
+}
+
+.context-menu-item.delete {
+  color: #d93025;
+}
+
+/* --- 绘图页面的样式 (保持不变) --- */
+.excalidraw-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+文件: D:\next_js\excalidraw-next-js-app\src\app\layout.js
+内容:
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata = {
+  title: "Create Next App",
+  description: "Generated by create next app",
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        {children}
+      </body>
+    </html>
+  );
+}
+
+
+文件: D:\next_js\excalidraw-next-js-app\src\app\page.js
+内容:
+// 文件: src/app/page.js
+
+'use client'; // 告诉 Next.js 这是一个客户端组件
+
+import { useRouter } from 'next/navigation';
+import HomePage from '../components/HomePage'; // 引入你的主页组件
+
+export default function Page() {
+  const router = useRouter();
+
+  // 定义一个导航函数，当 HomePage 组件需要跳转时调用
+  const handleNavigate = (pageId) => {
+    router.push(`/editor/${pageId}`); // 跳转到编辑器页面
+  };
+
+  return <HomePage onNavigateToPage={handleNavigate} />;
+}
+
+
+
+目录: D:\next_js\excalidraw-next-js-app\src\app\editor
+内容: [这是一个目录]
+
+目录: D:\next_js\excalidraw-next-js-app\src\app\imgs
+内容: [这是一个目录]
+
+目录: D:\next_js\excalidraw-next-js-app\src\app\editor\[pageId]
+内容: [这是一个目录]
+
+文件: D:\next_js\excalidraw-next-js-app\src\app\editor\[pageId]\page.jsx
+内容:
+// 文件: src/app/editor/[pageId]/page.jsx
+
+'use client';
+
+import { use } from 'react'; // 引入 use hook
+import { useRouter } from 'next/navigation';
+import EditorPage from '../../../components/EditorPage';
+
+export default function Page({ params }) {
+  const router = useRouter();
+  // 使用 React.use 来安全地解包 params
+  const resolvedParams = use(params); 
+  const { pageId } = resolvedParams;
+
+  const handleBackToHome = () => {
+    router.push('/');
+  };
+
+  return <EditorPage pageId={pageId} onBack={handleBackToHome} />;
+}
+
+文件: D:\next_js\excalidraw-next-js-app\src\app\imgs\favicon.ico
+内容: [无法作为文本读取，可能是二进制文件]
+
+文件: D:\next_js\excalidraw-next-js-app\src\components\EditorPage.jsx
+内容:
+// 文件: src/components/EditorPage.jsx
+
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+import debounce from 'lodash.debounce';
+
+import { db } from '../db';
+import '@excalidraw/excalidraw/index.css';
+
+const Excalidraw = dynamic(
+  async () => (await import('@excalidraw/excalidraw')).Excalidraw,
+  { 
+    ssr: false,
+    loading: () => <div style={{height: '100%', display: 'grid', placeContent: 'center'}}>加载编辑器...</div>
+  }
+);
+
+// --- 关键修复：把这个组件定义加回来！ ---
+const BackToHomeButton = ({ onClick }) => (
+  <button
+    onClick={onClick}
+    style={{
+      position: 'absolute',
+      top: '12px',
+      left: '80px',
+      zIndex: 100,
+      background: 'rgba(240, 240, 240, 0.9)',
+      border: '1px solid #ccc',
+      padding: '8px 12px',
+      borderRadius: '8px',
+      cursor: 'pointer',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    }}
+  >
+    ← 返回主页
+  </button>
+);
+// --- 修复结束 ---
+
+function EditorPage({ pageId, onBack }) {
+  const [page, setPage] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPageData = async () => {
+      if (!pageId) return;
+      setIsLoading(true);
+      const pageData = await db.getPageById(pageId);
+      setPage(pageData);
+      setIsLoading(false);
+    };
+    loadPageData();
+  }, [pageId]);
+
+  const handleDrawingChange = useCallback(
+    debounce(async (elements) => {
+      const currentPage = await db.getPageById(pageId);
+      if (currentPage) {
+        const updatedPage = { ...currentPage, data: elements };
+        await db.upsertPage(updatedPage);
+      }
+    }, 500),
+    [pageId]
+  );
+  
+  const handleBack = () => {
+    if (handleDrawingChange.flush) {
+      handleDrawingChange.flush();
+    }
+    onBack();
+  };
+
+  if (isLoading) return <div>正在加载绘图...</div>;
+  if (!page) return <div>错误：找不到页面数据。</div>;
+
+  return (
+    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+      <BackToHomeButton onClick={handleBack} />
+      <div style={{height: '100%'}}> 
+        <Excalidraw
+          key={page.id}
+          initialData={{ elements: page.data }}
+          onChange={handleDrawingChange}
+        />
+      </div>
+    </div>
+  );
+}
+
+export default EditorPage;
+
+文件: D:\next_js\excalidraw-next-js-app\src\components\HomePage.jsx
+内容:
+// 文件: src/components/HomePage.jsx
+
+import React, { useState, useEffect } from 'react';
+// 删掉这行，因为 ProjectThumbnail 会被动态加载，它自己会处理这个导入
+// import { exportToBlob } from '@excalidraw/excalidraw'; 
+import dynamic from 'next/dynamic'; // 引入 dynamic
+
+import { db } from '../db';  
+import { generateRandomName } from '../utils/nameGenerator'; 
+
+// 使用 dynamic 动态加载 ProjectThumbnail 组件，并禁止SSR
+const ProjectThumbnail = dynamic(
+  () => import('./ProjectThumbnail'), // 我们需要把 ProjectThumbnail 拆成一个单独的文件
+  { 
+    ssr: false, // 告诉 Next.js 绝对不要在服务端渲染它
+    loading: () => <div style={{ color: '#aaa' }}>加载缩略图...</div> // 提供一个加载中的占位符
+  }
+);
+
+
+const ContextMenu = ({ x, y, page, onRename, onDelete, onClose }) => { /* ...代码保持不变... */ useEffect(() => { const handleClickOutside = () => onClose(); document.addEventListener('click', handleClickOutside); return () => document.removeEventListener('click', handleClickOutside); }, [onClose]); return ( <div className="context-menu" style={{ top: y, left: x }}> <button className="context-menu-item" onClick={() => { onRename(page); onClose(); }}>重命名</button> <button className="context-menu-item delete" onClick={() => { onDelete(page.id); onClose(); }}>删除页面</button> </div> ); };
+
+// ProjectCard 组件保持不变...
+const ProjectCard = ({ page, ...props }) => {
+  return (
+    <div className="project-card" onContextMenu={(e) => props.onContextMenu(e, page)}>
+      <div className="card-thumbnail" onClick={() => props.onSelect(page.id)}>
+        <ProjectThumbnail pageData={page} />
+      </div>
+      <div className="card-info">
+        {props.renamingPageId === page.id ? ( <input type="text" className="rename-input-card" value={props.renameInputValue} onChange={(e) => props.setRenameInputValue(e.target.value)} onBlur={() => props.onRenameSubmit()} onKeyDown={(e) => { if (e.key === 'Enter') props.onRenameSubmit(); else if (e.key === 'Escape') props.onRenameSubmit(true); }} onClick={(e) => e.stopPropagation()} autoFocus /> ) : ( <span className="page-name" onClick={() => props.onSelect(page.id)}>{page.name}</span> )}
+      </div>
+    </div>
+  );
+};
+
+
+// HomePage 主组件保持不变...
+function HomePage({ onNavigateToPage }) {
+  // ...所有的 state 和函数都保持不变...
+  const [pages, setPages] = useState([]); const [isLoading, setIsLoading] = useState(true); const [contextMenu, setContextMenu] = useState({ visible: false, x: 0, y: 0, page: null }); const [renamingPageId, setRenamingPageId] = useState(null); const [renameInputValue, setRenameInputValue] = useState(''); useEffect(() => { loadPages(); }, []); const loadPages = async () => { setIsLoading(true); let dbPages = await db.getAllPages(); dbPages.sort((a, b) => b.id.localeCompare(a.id)); setPages(dbPages); setIsLoading(false); }; const handleAddNewPage = async () => { const newPage = { id: `page-${Date.now()}`, name: generateRandomName(), data: [] }; await db.upsertPage(newPage); onNavigateToPage(newPage.id); }; const handleDeletePage = async (pageId) => { if (window.confirm("确定要删除吗？")) { await db.deletePage(pageId); loadPages(); } }; const handleContextMenu = (e, page) => { e.preventDefault(); e.stopPropagation(); setRenamingPageId(null); setContextMenu({ visible: true, x: e.pageX, y: e.pageY, page: page }); }; const startRename = (page) => { setRenamingPageId(page.id); setRenameInputValue(page.name); }; const handleRenameSubmit = async (isCancel = false) => { if (!renamingPageId) return; if (!isCancel) { const finalName = renameInputValue.trim() || "未命名草稿"; const pageToUpdate = pages.find(p => p.id === renamingPageId); if (pageToUpdate && pageToUpdate.name !== finalName) { const updatedPage = { ...pageToUpdate, name: finalName }; await db.upsertPage(updatedPage); setPages(pages.map(p => p.id === renamingPageId ? updatedPage : p)); } } setRenamingPageId(null); }; if (isLoading) return <div>正在加载作品集...</div>;
+
+  return (
+    // ...主页的 JSX 结构保持不变...
+    <div className="home-page-container"> <h1>我的作品集</h1> <div className="projects-grid"> <div className="project-card new-project-card" onClick={handleAddNewPage}> <div className="plus-icon">+</div> </div> {pages.map(page => ( <ProjectCard key={page.id} page={page} onSelect={onNavigateToPage} onContextMenu={handleContextMenu} onRenameSubmit={handleRenameSubmit} renamingPageId={renamingPageId} setRenameInputValue={setRenameInputValue} renameInputValue={renameInputValue} /> ))} </div> {contextMenu.visible && ( <ContextMenu x={contextMenu.x} y={contextMenu.y} page={contextMenu.page} onRename={startRename} onDelete={handleDeletePage} onClose={() => setContextMenu({ ...contextMenu, visible: false })} /> )} </div>
+  );
+}
+
+export default HomePage;
+
+文件: D:\next_js\excalidraw-next-js-app\src\components\ProjectThumbnail.jsx
+内容:
+// 文件: src/components/ProjectThumbnail.jsx
+
+import React, { useState, useEffect } from 'react';
+import { exportToBlob } from '@excalidraw/excalidraw'; // 这个导入现在是安全的，因为该组件只在客户端加载
+import { db } from '../db';
+
+const ProjectThumbnail = ({ pageData }) => {
+  const [thumbnail, setThumbnail] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    if (pageData.thumbnail) {
+      setThumbnail(pageData.thumbnail);
+      return;
+    }
+    if (!pageData.data || pageData.data.length === 0 || isGenerating) {
+      return;
+    }
+
+    const generate = async () => {
+      setIsGenerating(true);
+      try {
+        const blob = await exportToBlob({
+          elements: pageData.data,
+          appState: { exportBackground: true, viewBackgroundColor: '#ffffff' },
+          files: null, mimeType: 'image/png', quality: 0.5, width: 280, height: 180,
+        });
+        
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const base64data = reader.result;
+          db.upsertPage({ ...pageData, thumbnail: base64data });
+          setThumbnail(base64data);
+          setIsGenerating(false);
+        };
+        reader.readAsDataURL(blob);
+
+      } catch (error) {
+        console.error("生成缩略图失败:", error);
+        setIsGenerating(false);
+      }
+    };
+
+    generate();
+  }, [pageData, isGenerating]);
+
+  if (thumbnail) {
+    return <img src={thumbnail} alt={pageData.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />;
+  }
+  return <div style={{ color: '#aaa' }}>{isGenerating ? '生成中...' : '没有绘图'}</div>;
+};
+
+export default ProjectThumbnail;
+
+文件: D:\next_js\excalidraw-next-js-app\src\utils\nameGenerator.js
+内容:
+const ADJECTIVES = [
+  '快乐的', '勇敢的', '聪明的', '好奇的', '闪亮的', '宁静的',
+  '巨大的', '微小的', '神秘的', '迅速的', '温暖的', '冷静的',
+  '活泼的', '温柔的', '狡猾的', '迷人的', '大胆的', '优雅的',
+  '奇幻的', '坚韧的', '耀眼的', '灵动的', '沉稳的', '俏皮的'
+];
+
+const NOUNS = [
+  '西瓜', '老虎', '月亮', '河流', '森林', '代码', '火箭',
+  '城堡', '钥匙', '旅程', '梦想', '回声', '故事', '鲸鱼',
+  '彩虹', '灯塔', '云朵', '山峰', '星辰', '书本', '风筝',
+  '海洋', '火花', '村庄', '秘密', '微风', '宇宙'
+];
+
+const VERBS = [
+  '思考', '跳跃', '飞翔', '探索', '编码', '生长', '闪耀', '漂流',
+  '奔跑', '歌唱', '旋转', '发现', '绘画', '追逐', '绽放', '遨游'
+];
+
+const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+export const generateRandomName = () => {
+  return `${getRandomElement(ADJECTIVES)}${getRandomElement(NOUNS)}的${getRandomElement(VERBS)}`;
+};
