@@ -1,3 +1,5 @@
+// 文件: src/utils/nameGenerator.js
+
 const ADJECTIVES = [
   '快乐的', '勇敢的', '聪明的', '好奇的', '闪亮的', '宁静的',
   '巨大的', '微小的', '神秘的', '迅速的', '温暖的', '冷静的',
@@ -12,13 +14,21 @@ const NOUNS = [
   '海洋', '火花', '村庄', '秘密', '微风', '宇宙'
 ];
 
-const VERBS = [
-  '思考', '跳跃', '飞翔', '探索', '编码', '生长', '闪耀', '漂流',
-  '奔跑', '歌唱', '旋转', '发现', '绘画', '追逐', '绽放', '遨游'
-];
-
 const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 export const generateRandomName = () => {
-  return `${getRandomElement(ADJECTIVES)}${getRandomElement(NOUNS)}的${getRandomElement(VERBS)}`;
+  // 1. 获取当前日期
+  const today = new Date();
+  
+  // 2. 格式化为 YYYY-MM-DD
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, '0'); // 月份从0开始，所以+1
+  const day = String(today.getDate()).padStart(2, '0');
+  const dateStr = `${year}-${month}-${day}`;
+
+  // 3. 构造新名称
+  const adjective = getRandomElement(ADJECTIVES);
+  const noun = getRandomElement(NOUNS);
+  
+  return `${dateStr}-${adjective}${noun}`;
 };

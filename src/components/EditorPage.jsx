@@ -58,7 +58,9 @@ function EditorPage({ pageId, onBack }) {
     debounce(async (elements) => {
       const currentPage = await db.getPageById(pageId);
       if (currentPage) {
-        const updatedPage = { ...currentPage, data: elements };
+        // [需求一 修复] 在更新数据时，将 thumbnail 设为 null
+        // 这样就能强制主页重新生成缩略图
+        const updatedPage = { ...currentPage, data: elements, thumbnail: null };
         await db.upsertPage(updatedPage);
       }
     }, 500),

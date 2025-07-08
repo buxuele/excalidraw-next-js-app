@@ -16,8 +16,7 @@ def list_and_print_files():
                      "过程记录.md", "README.md", "readme.md", 
                      "assets", "gists.json", "gist_app.pyw",
                      "todo.md",
-                     "node_modules", # 补充：排除 node_modules，这个目录非常大
-                     ".next"       # 补充：排除 .next 编译目录
+                     "node_modules",      ".next"  
                      ]
     # 输出文件
     output_file = "my_files.txt"
